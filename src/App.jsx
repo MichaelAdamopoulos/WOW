@@ -147,7 +147,7 @@ export default function TallyApp() {
       {/* Header */}
       <div style={{ padding: "24px 20px 16px", borderBottom: `1px solid ${C.border}` }}>
         <div className="display" style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "-0.02em" }}>
-          Who Owes Who
+          Who Owes What
         </div>
         <div style={{ fontSize: "13px", color: C.textMuted, marginTop: "2px" }}>
           who paid, who owes, settled fast
