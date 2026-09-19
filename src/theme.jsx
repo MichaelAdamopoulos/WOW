@@ -37,7 +37,28 @@ export const GlobalStyle = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
     * { box-sizing: border-box; }
-    body { margin: 0; background: ${C.bg}; }
+    html, body, #root { height: 100%; }
+    html, body { margin: 0; overflow: hidden; }
+    body { background: ${C.bg}; overscroll-behavior: none; }
+
+    /* Every screen is a fixed-height column: pinned header, scrolling middle, optional pinned footer.
+       100vh first as a fallback for browsers without dvh. */
+    .app-screen {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+      overflow: hidden;
+      background: ${C.bg};
+      color: ${C.textPrimary};
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+    .app-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+    .app-pinned { flex-shrink: 0; }
+
     .mono { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
     .display { font-family: 'Space Grotesk', sans-serif; }
     input, select { font-family: inherit; }

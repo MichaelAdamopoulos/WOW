@@ -57,91 +57,84 @@ export default function Auth() {
   };
 
   return (
-    <div
-      style={{
-        background: C.bg,
-        color: C.textPrimary,
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "20px",
-      }}
-    >
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          width: "100%",
-          maxWidth: "360px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "14px",
-        }}
-      >
-        <div>
-          <div className="display" style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "-0.02em" }}>
-            Tally
-          </div>
-          <div style={{ fontSize: "13px", color: C.textMuted, marginTop: "2px" }}>
-            {mode === "login" ? "Welcome back." : "Create your account."}
-          </div>
-        </div>
-
-        {mode === "signup" && (
-          <div>
-            <div style={labelStyle}>Username</div>
-            <input style={inputStyle} value={username} onChange={(e) => setUsername(e.target.value)} placeholder="e.g. maria23" autoCapitalize="none" />
-          </div>
-        )}
-
-        {mode === "login" ? (
-          <div>
-            <div style={labelStyle}>Username or email</div>
-            <input style={inputStyle} value={identifier} onChange={(e) => setIdentifier(e.target.value)} autoCapitalize="none" />
-          </div>
-        ) : (
-          <div>
-            <div style={labelStyle}>Email</div>
-            <input style={inputStyle} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
-        )}
-
-        <div>
-          <div style={labelStyle}>Password</div>
-          <input style={inputStyle} type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        </div>
-
-        {error && <div style={{ fontSize: "13px", color: C.red }}>{error}</div>}
-        {notice && <div style={{ fontSize: "13px", color: C.green }}>{notice}</div>}
-
-        <button
-          type="submit"
-          disabled={loading}
+    <div className="app-screen">
+      <div className="app-scroll" style={{ display: "flex", padding: "20px" }}>
+        <form
+          onSubmit={handleSubmit}
           style={{
-            background: C.amber,
-            color: C.ink,
-            border: "none",
-            borderRadius: "10px",
-            padding: "12px",
-            fontWeight: 600,
-            fontSize: "14px",
+            width: "100%",
+            maxWidth: "360px",
+            margin: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: "14px",
           }}
         >
-          {loading ? "Working…" : mode === "login" ? "Log in" : "Create account"}
-        </button>
+          <div>
+            <div className="display" style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "-0.02em" }}>
+              Tally
+            </div>
+            <div style={{ fontSize: "13px", color: C.textMuted, marginTop: "2px" }}>
+              {mode === "login" ? "Welcome back." : "Create your account."}
+            </div>
+          </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            setMode(mode === "login" ? "signup" : "login");
-            setError("");
-            setNotice("");
-          }}
-          style={{ background: "none", border: "none", color: C.textMuted, fontSize: "13px", padding: "4px" }}
-        >
-          {mode === "login" ? "New here? Create an account" : "Already have an account? Log in"}
-        </button>
-      </form>
+          {mode === "signup" && (
+            <div>
+              <div style={labelStyle}>Username</div>
+              <input style={inputStyle} value={username} onChange={(e) => setUsername(e.target.value)} placeholder="e.g. maria23" autoCapitalize="none" />
+            </div>
+          )}
+
+          {mode === "login" ? (
+            <div>
+              <div style={labelStyle}>Username or email</div>
+              <input style={inputStyle} value={identifier} onChange={(e) => setIdentifier(e.target.value)} autoCapitalize="none" />
+            </div>
+          ) : (
+            <div>
+              <div style={labelStyle}>Email</div>
+              <input style={inputStyle} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+          )}
+
+          <div>
+            <div style={labelStyle}>Password</div>
+            <input style={inputStyle} type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          </div>
+
+          {error && <div style={{ fontSize: "13px", color: C.red }}>{error}</div>}
+          {notice && <div style={{ fontSize: "13px", color: C.green }}>{notice}</div>}
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              background: C.amber,
+              color: C.ink,
+              border: "none",
+              borderRadius: "10px",
+              padding: "12px",
+              fontWeight: 600,
+              fontSize: "14px",
+            }}
+          >
+            {loading ? "Working…" : mode === "login" ? "Log in" : "Create account"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setMode(mode === "login" ? "signup" : "login");
+              setError("");
+              setNotice("");
+            }}
+            style={{ background: "none", border: "none", color: C.textMuted, fontSize: "13px", padding: "4px" }}
+          >
+            {mode === "login" ? "New here? Create an account" : "Already have an account? Log in"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

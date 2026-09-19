@@ -56,103 +56,97 @@ export default function Groups({ session, onOpenGroup }) {
   };
 
   return (
-    <div
-      style={{
-        background: C.bg,
-        color: C.textPrimary,
-        minHeight: "100vh",
-        fontFamily: "'IBM Plex Sans', sans-serif",
-        maxWidth: "440px",
-        margin: "0 auto",
-        padding: "24px 20px",
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
-        <div>
-          <div className="display" style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "-0.02em" }}>
-            Your groups
+    <div className="app-screen">
+      <div className="app-pinned" style={{ padding: "24px 20px 16px", borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+          <div>
+            <div className="display" style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "-0.02em" }}>
+              Your groups
+            </div>
+            <div style={{ fontSize: "13px", color: C.textMuted, marginTop: "2px" }}>pick one, or start a new one</div>
           </div>
-          <div style={{ fontSize: "13px", color: C.textMuted, marginTop: "2px" }}>pick one, or start a new one</div>
+          <button
+            onClick={() => supabase.auth.signOut()}
+            title="Log out"
+            style={{ background: "none", border: "none", color: C.textMuted, padding: "6px" }}
+          >
+            <LogOut size={18} />
+          </button>
         </div>
-        <button
-          onClick={() => supabase.auth.signOut()}
-          title="Log out"
-          style={{ background: "none", border: "none", color: C.textMuted, padding: "6px" }}
-        >
-          <LogOut size={18} />
-        </button>
+
+        <div style={{ display: "flex", gap: "8px" }}>
+          <input
+            style={inputStyle}
+            value={newGroupName}
+            onChange={(e) => setNewGroupName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && createGroup()}
+            placeholder="New group name (e.g. Roommates)"
+          />
+          <button
+            onClick={createGroup}
+            disabled={creating}
+            style={{
+              background: C.amber,
+              color: C.ink,
+              border: "none",
+              borderRadius: "10px",
+              padding: "0 16px",
+              fontWeight: 600,
+              fontSize: "14px",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <Plus size={16} /> Create
+          </button>
+        </div>
       </div>
 
-      <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
-        <input
-          style={inputStyle}
-          value={newGroupName}
-          onChange={(e) => setNewGroupName(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && createGroup()}
-          placeholder="New group name (e.g. Roommates)"
-        />
-        <button
-          onClick={createGroup}
-          disabled={creating}
-          style={{
-            background: C.amber,
-            color: C.ink,
-            border: "none",
-            borderRadius: "10px",
-            padding: "0 16px",
-            fontWeight: 600,
-            fontSize: "14px",
-            display: "flex",
-            alignItems: "center",
-            gap: "4px",
-            whiteSpace: "nowrap",
-          }}
-        >
-          <Plus size={16} /> Create
-        </button>
+      <div className="app-scroll" style={{ padding: "16px 20px 24px" }}>
+        {loading ? (
+          <div style={{ color: C.textMuted, fontSize: "14px" }}>Loading…</div>
+        ) : groups.length === 0 ? (
+          <div
+            style={{
+              border: `1px dashed ${C.border}`,
+              borderRadius: "12px",
+              padding: "28px 16px",
+              textAlign: "center",
+              color: C.textMuted,
+              fontSize: "13.5px",
+            }}
+          >
+            No groups yet. Create one above to start tracking bills with friends.
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {groups.map((g) => (
+              <button
+                key={g.id}
+                onClick={() => onOpenGroup(g.id)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  background: C.surface,
+                  border: `1px solid ${C.border}`,
+                  borderRadius: "12px",
+                  padding: "14px",
+                  color: C.textPrimary,
+                  fontSize: "14.5px",
+                  fontWeight: 500,
+                  textAlign: "left",
+                }}
+              >
+                <Users size={18} color={C.amber} />
+                {g.name}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-
-      {loading ? (
-        <div style={{ color: C.textMuted, fontSize: "14px" }}>Loading…</div>
-      ) : groups.length === 0 ? (
-        <div
-          style={{
-            border: `1px dashed ${C.border}`,
-            borderRadius: "12px",
-            padding: "28px 16px",
-            textAlign: "center",
-            color: C.textMuted,
-            fontSize: "13.5px",
-          }}
-        >
-          No groups yet. Create one above to start tracking bills with friends.
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          {groups.map((g) => (
-            <button
-              key={g.id}
-              onClick={() => onOpenGroup(g.id)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                background: C.surface,
-                border: `1px solid ${C.border}`,
-                borderRadius: "12px",
-                padding: "14px",
-                color: C.textPrimary,
-                fontSize: "14.5px",
-                fontWeight: 500,
-                textAlign: "left",
-              }}
-            >
-              <Users size={18} color={C.amber} />
-              {g.name}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

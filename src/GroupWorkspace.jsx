@@ -10,8 +10,10 @@ export default function GroupWorkspace({ groupId, session, onBack }) {
   const [groupName, setGroupName] = useState("");
   const [members, setMembers] = useState([]);
   const [bills, setBills] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [tab, setTab] = useState("bills");
   const [showAddBill, setShowAddBill] = useState(false);
+  const [showAddPayment, setShowAddPayment] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const fetchGroup = useCallback(async () => {
@@ -53,20 +55,45 @@ export default function GroupWorkspace({ groupId, session, onBack }) {
     setLoading(false);
   }, [groupId]);
 
+  const fetchPayments = useCallback(async () => {
+    const { data } = await supabase
+      .from("payments")
+      .select("id, from_user, to_user, amount, note, created_at")
+      .eq("group_id", groupId)
+      .order("created_at", { ascending: false });
+    if (data) {
+      setPayments(
+        data.map((p) => ({
+          id: p.id,
+          from: p.from_user,
+          to: p.to_user,
+          amount: p.amount,
+          note: p.note,
+          date: p.created_at,
+        }))
+      );
+    }
+  }, [groupId]);
+
   useEffect(() => {
     fetchGroup();
     fetchMembers();
     fetchBills();
+    fetchPayments();
 
     const channel = supabase
       .channel(`group-${groupId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "bills", filter: `group_id=eq.${groupId}` }, fetchBills)
       .on("postgres_changes", { event: "*", schema: "public", table: "bill_splits" }, fetchBills)
       .on("postgres_changes", { event: "*", schema: "public", table: "group_members", filter: `group_id=eq.${groupId}` }, fetchMembers)
+      .on("postgres_changes", { event: "*", schema: "public", table: "payments", filter: `group_id=eq.${groupId}` }, fetchPayments)
+      // Realtime can't filter DELETE events (the old row only carries the primary key), so the
+      // filtered subscription above never fires when someone else deletes a payment.
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "payments" }, fetchPayments)
       .subscribe();
 
     return () => supabase.removeChannel(channel);
-  }, [groupId, fetchGroup, fetchMembers, fetchBills]);
+  }, [groupId, fetchGroup, fetchMembers, fetchBills, fetchPayments]);
 
   const balances = useMemo(() => {
     const bal = {};
@@ -77,8 +104,13 @@ export default function GroupWorkspace({ groupId, session, onBack }) {
         bal[uid] = (bal[uid] || 0) - amt;
       });
     });
+    // A payment is a direct debt reduction: the payer's balance rises, the receiver's falls.
+    payments.forEach((p) => {
+      bal[p.from] = (bal[p.from] || 0) + p.amount;
+      bal[p.to] = (bal[p.to] || 0) - p.amount;
+    });
     return bal;
-  }, [members, bills]);
+  }, [members, bills, payments]);
 
   const settlements = useMemo(() => {
     const creditors = [];
@@ -136,19 +168,31 @@ export default function GroupWorkspace({ groupId, session, onBack }) {
     fetchBills();
   };
 
+  const savePayment = async (draft) => {
+    const { error } = await supabase.from("payments").insert({
+      group_id: groupId,
+      from_user: draft.from,
+      to_user: draft.to,
+      amount: draft.amount,
+      note: draft.note || null,
+      created_by: session.user.id,
+    });
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    fetchPayments();
+  };
+
+  const deletePayment = async (id) => {
+    const { error } = await supabase.from("payments").delete().eq("id", id);
+    if (error) alert(error.message);
+    fetchPayments();
+  };
+
   return (
-    <div
-      style={{
-        background: C.bg,
-        color: C.textPrimary,
-        minHeight: "100vh",
-        fontFamily: "'IBM Plex Sans', sans-serif",
-        maxWidth: "440px",
-        margin: "0 auto",
-        position: "relative",
-      }}
-    >
-      <div style={{ padding: "20px 20px 16px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: "10px" }}>
+    <div className="app-screen">
+      <div className="app-pinned" style={{ padding: "20px 20px 16px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: "10px" }}>
         <button onClick={onBack} style={{ background: "none", border: "none", color: C.textMuted, padding: "4px" }}>
           <ArrowLeft size={20} />
         </button>
@@ -162,19 +206,24 @@ export default function GroupWorkspace({ groupId, session, onBack }) {
         </div>
       </div>
 
-      <div style={{ padding: "16px 20px 90px", minHeight: "420px" }}>
+      <div key={tab} className="app-scroll" style={{ padding: "16px 20px 24px" }}>
         {loading ? (
           <div style={{ color: C.textMuted, fontSize: "14px", padding: "40px 0", textAlign: "center" }}>Loading…</div>
         ) : tab === "bills" ? (
           <BillsTab
             members={members}
             bills={bills}
+            payments={payments}
             memberName={memberName}
             memberColor={memberColor}
             deleteBill={deleteBill}
+            deletePayment={deletePayment}
             showAddBill={showAddBill}
             setShowAddBill={setShowAddBill}
+            showAddPayment={showAddPayment}
+            setShowAddPayment={setShowAddPayment}
             saveBill={saveBill}
+            savePayment={savePayment}
           />
         ) : tab === "balances" ? (
           <BalancesTab members={members} balances={balances} settlements={settlements} memberName={memberName} />
@@ -183,7 +232,7 @@ export default function GroupWorkspace({ groupId, session, onBack }) {
         )}
       </div>
 
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: "440px", margin: "0 auto", display: "flex", background: C.surface, borderTop: `1px solid ${C.border}` }}>
+      <div className="app-pinned" style={{ display: "flex", background: C.surface, borderTop: `1px solid ${C.border}` }}>
         {[
           { id: "bills", label: "Bills", icon: Receipt },
           { id: "balances", label: "Balances", icon: ArrowRightLeft },
