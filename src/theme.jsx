@@ -16,7 +16,7 @@ export const AVATAR_COLORS = ["#7FD99A", "#F2C14E", "#FF7A68", "#6FB8E0", "#C792
 
 export const fmt = (n) => {
   const v = Math.abs(n) < 0.005 ? 0 : n;
-  return (v < 0 ? "-$" : "$") + Math.abs(v).toFixed(2);
+  return (v < 0 ? "-€" : "€") + Math.abs(v).toFixed(2);
 };
 
 export const inputStyle = {

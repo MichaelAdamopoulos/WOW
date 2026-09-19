@@ -16,7 +16,7 @@ export default function BalancesTab({ members, balances, settlements, memberName
               </div>
               <div className="mono" style={{ fontSize: "13.5px", color: bal > 0.005 ? C.green : bal < -0.005 ? C.red : C.textMuted }}>
                 {bal > 0.005 ? "is owed " : bal < -0.005 ? "owes " : ""}
-                {fmt(Math.abs(bal) < 0.005 ? 0 : bal)}
+                {fmt(Math.abs(bal))}
               </div>
             </div>
           );
